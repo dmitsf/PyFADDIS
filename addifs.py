@@ -18,11 +18,13 @@ def faddis(A):
     sc = np.power(A, 2);
 
     scatter = np.sum(sc)
-    member=np.zeros((nn, 1))
+    member=np.zeros((nn, nn)) ## 1
     tt=1
     At=(A+A.T)/2
     B = []
     contrib = []
+    lat = []
+    intensity = []
     B.append(np.copy(At))
     la=1
     cont=1
@@ -42,20 +44,19 @@ def faddis(A):
         print('iteration ', tt)
         # (lt, ii) - (maximum eigen-value, corresponding position)
         da = np.diag(d)
-        nonzero_cond = np.array(v > ZERO_BOUND)
-        di = da[nonzero_cond, :][:, nonzero_cond]
-        
-        dl, _ = di.shape
-        inten = np.zeros((dl,1))
-        vm = np.zeros((nn,dl))
+        nonzero_cond = np.array(d > ZERO_BOUND)
+        di = np.argwhere(d > ZERO_BOUND).ravel()
+        dl = di.size
+        inten = np.zeros((dl, 1))
+        vm = np.zeros((nn, dl))
         for k in range(dl):
             lt = da[di[k]]
             vf = v[:, di[k]]
             # Calculate normalized membership vector belonging to [0, 1] by
             # projection on the space. The normalization factor is the
             # Euclidean length of the vector
-            bf = max (zerv, vf)
-            uf = min(bf, onev)
+            bf = np.maximum(zerv, vf)
+            uf = np.minimum(bf, onev)
             if LA.norm(uf) > 0:
                 uf = uf / LA.norm(uf)
 
@@ -71,8 +72,8 @@ def faddis(A):
             # since lt*vf =(-lt)*(-vf), try symmetric version 
             # using -vf:
             vf1 = -vf
-            bf1 = max(zerv, vf1)
-            uf1 = min(bf1, onev)
+            bf1 = np.maximum(zerv, vf1)
+            uf1 = np.minimum(bf1, onev)
             if LA.norm(uf1)>0:
                 uf1 = uf1 / LA.norm(uf1)
 
@@ -85,16 +86,16 @@ def faddis(A):
 
             if la>la1:
                 inten[k] = la
-                vm[:,k] = uf
+                vm[:,k] = uf.ravel()
             else:
                 inten[k] = la1
-                vm[:,k] = uf1
+                vm[:,k] = uf1.ravel()
 
         [ite,ik] = inten.max(), inten.argmax()
 
         if ite > ZERO_BOUND:
-            lat[tt] = da[di[ik]]
-            intensity(tt,:)=[sqrt(ite) ite];
+            lat.append(da[di[ik]])
+            intensity.append(np.array([np.sqrt(ite), ite]))
             # square root and value of lambda intensity of cluster tt
             # square root shows the value of fuzzyness
             uf=vm[:,ik]
@@ -103,7 +104,7 @@ def faddis(A):
             member[:,tt]=uf
             # calculate residual similarity matrix: remove the present cluster (i.e. itensity* membership) from
             # similarity matrix
-            Att = At - ite.dot(uf).dot(uf.T)
+            Att = At - ite * uf.dot(uf.T)
             At=(Att+Att.T) / 2
             B.append(At)
             cont = (vt / wt) ** 2
@@ -119,11 +120,11 @@ def faddis(A):
     #member=member(:,tt);
     if not flagg:
         print('No positive weights at spectral clusters')
-    elif(cont<conc):
+    elif cont<conc:
         print('Cluster contribution is too small')
-    elif ((ep>eps)==0):
+    elif ep>eps:
         print('Residual is too small')
-    elif (tt<=numc)==0):
+    elif tt<=numc:
         print('Maximum number of clusters reached')
 
     return member
