@@ -15,20 +15,20 @@ def faddis(A):
     eps = EPSILON
     numc = NUM_CLUSTERS
 
-    flagg=1;
+    is_positive = True
     nn, _ = A.shape
 
     sc = np.power(A, 2);
 
     scatter = np.sum(sc)
-    member = np.matrix() #[] #np.zeros((nn, nn))
+    member = np.empty((nn, 0))
     tt = 0
     At = (A+A.T)/2
     B = []
-    contrib = []
-    lat = []
-    intensity = []
-    B.append(np.copy(At))
+    contrib = np.array([])
+    lat = np.empty((0, nn)) #
+    intensity = np.empty((0, 2))
+    B.append(At)
     la = 1
     cont = 1
     ep = 1
@@ -36,12 +36,12 @@ def faddis(A):
     zerv = np.zeros((nn,1))
     onev = np.ones((nn,1))
 
-    # Stop condition: 
-    # flagg= eigen-value of the residual matrix is not positive;
+    # Stop condition:
+    # is_positive is True: eigen-value of the residual matrix is not positive;
     # OR la cluster intensity  reaches its minimum lam;
     # OR ep relative residual data scatter reaches its minimum eps;
     # OR maximum number of clusters numc is achieved
-    while flagg and cont > conc and ep > eps and tt <= numc:
+    while is_positive and cont > conc and ep > eps and tt <= numc:
         #collecting a fuzzy cluster membership uf, with contrib con and intensity la,
         d, v = LA.eig(At)
         # (lt, ii) - (maximum eigen-value, corresponding position)
@@ -105,15 +105,16 @@ def faddis(A):
 
         ite, ik = inten.max(), inten.argmax()
         if ite > ZERO_BOUND:
-            lat.append(da[di[ik]])
-            intensity.append(np.array([np.sqrt(ite), ite]))
+            #lat.append(da[di[ik]])
+            lat = np.append(lat, np.matrix(da[di[ik]]), axis=0)
+            intensity = np.append(intensity, np.matrix([np.sqrt(ite), ite]), axis=0)
             # square root and value of lambda intensity of cluster tt
             # square root shows the value of fuzzyness
             uf=vm[:,ik]
             vt=uf.T.dot(At).dot(uf)
             wt=uf.T.dot(uf)
-            member[:,tt]=uf
-
+            #member[:,tt]=uf
+            member = np.append(member, np.matrix(uf).T, axis=1)
             # calculate residual similarity matrix:
             # remove the present cluster (i.e. itensity* membership) from
             # similarity matrix
@@ -124,14 +125,14 @@ def faddis(A):
             cont = (vt / wt) ** 2
             # Calculate the relative contribution of cluster tt
             cont /= scatter
-            contrib.append(cont)
+            contrib = np.append(contrib, cont)
             # Calculate the residual contribution
             ep -= cont
             tt += 1
         else:
-            flagg=0
+            is_positive = False
 
-    if not flagg:
+    if not is_positive:
         print('No positive weights at spectral clusters')
     elif cont < conc:
         print('Cluster contribution is too small')
