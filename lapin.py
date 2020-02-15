@@ -17,13 +17,13 @@ def lapin(A):
         A = A[:, checked][checked, :]
         a_sums = a_sums[checked]
 
-    n, _ = A.shape
-    C = np.empty([n, n])
-    for i in range(n):
-        for j in range(n):
+    matrix_dim, _ = A.shape
+    C = np.empty((matrix_dim, matrix_dim))
+    for i in range(matrix_dim):
+        for j in range(matrix_dim):
             C[i, j] = A[i, j] / np.sqrt(a_sums[i] * a_sums[j])
 
-    eig_vals, eig_vecs = LA.eig(np.eye(n) - C)
+    eig_vals, eig_vecs = LA.eig(np.eye(matrix_dim) - C)
     eig_vals_diag = np.diag(eig_vals)
     nonzero_cond = np.array(eig_vals > ZERO_BOUND)
     nonzero_eig_vals_diag = eig_vals_diag[nonzero_cond, :][:, nonzero_cond]

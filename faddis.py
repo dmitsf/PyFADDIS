@@ -16,25 +16,25 @@ def faddis(A):
     numc = NUM_CLUSTERS
 
     is_positive = True
-    nn, _ = A.shape
+    matrix_dim, _ = A.shape
 
     sc = np.power(A, 2);
 
     scatter = np.sum(sc)
-    member = np.empty((nn, 0))
+    member = np.empty((matrix_dim, 0))
     tt = 0
     At = (A+A.T)/2
     B = []
     contrib = np.array([])
-    lat = np.empty((0, nn)) #
+    lat = np.empty((0, matrix_dim))
     intensity = np.empty((0, 2))
     B.append(At)
     la = 1
     cont = 1
     ep = 1
     num = 0 # unused
-    zerv = np.zeros((nn,1))
-    onev = np.ones((nn,1))
+    zerv = np.zeros((matrix_dim, 1))
+    onev = np.ones((matrix_dim, 1))
 
     # Stop condition:
     # is_positive is True: eigen-value of the residual matrix is not positive;
