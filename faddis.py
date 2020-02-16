@@ -40,7 +40,7 @@ def faddis(A):
     membership_matrix = np.empty((matrix_dim, 0))
     contrib = np.array([])
     lat = np.array([])
-    intensity = np.empty((0, 2))
+    intensities = np.empty((0, 2))
     curr_cont = 1
     res_cont = 1
 
@@ -65,7 +65,7 @@ def faddis(A):
         # Only positive eigenvalues
         eig_vals_pos = np.argwhere(eig_vals > ZERO_BOUND).ravel()
         eig_vals_pos_len = eig_vals_pos.size
-        inten = np.zeros((eig_vals_pos_len, 1))
+        cur_intensities = np.zeros((eig_vals_pos_len, 1))
         vm = np.zeros((matrix_dim, eig_vals_pos_len))
         for k in range(eig_vals_pos_len):
             lt = eig_vals_diag[eig_vals_pos[k]]
@@ -110,19 +110,20 @@ def faddis(A):
                 la1 = 0
 
             if la > la1:
-                inten[k] = la
+                cur_intensities[k] = la
                 vm[:, k] = uf.ravel()
             else:
-                inten[k] = la1
+                cur_intensities[k] = la1
                 vm[:, k] = uf1.ravel()
 
-        ite, ik = inten.max(), inten.argmax()
-        if ite > ZERO_BOUND:
-            lat = np.append(lat, eig_vals[eig_vals_pos[ik]])
-            intensity = np.append(intensity, np.matrix([np.sqrt(ite), ite]), axis=0)
+        inten_max, inten_max_index = cur_intensities.max(), cur_intensities.argmax()
+        if inten_max > ZERO_BOUND:
+            lat = np.append(lat, eig_vals[eig_vals_pos[inten_max_index]])
+            intensities = np.append(intensities, np.matrix([np.sqrt(inten_max),
+                                                            inten_max]), axis=0)
             # square root and value of lambda intensity of cluster_got
             # square root shows the value of fuzzyness
-            uf = vm[:,ik]
+            uf = vm[:, inten_max_index]
             vt = uf.T.dot(At).dot(uf)
             wt = uf.T.dot(uf)
 
@@ -130,7 +131,7 @@ def faddis(A):
             # calculate residual similarity matrix:
             # remove the present cluster (i.e. itensity* membership) from
             # similarity matrix
-            Att = At - ite * np.matrix(uf).T * np.matrix(uf)
+            Att = At - inten_max * np.matrix(uf).T * np.matrix(uf)
             At = (Att + Att.T) / 2
             matrix_sequence.append(At)
 
@@ -153,7 +154,7 @@ def faddis(A):
     elif cluster_got > max_clust_num:
         print('Maximum number of clusters reached')
 
-    return matrix_sequence, membership_matrix, contrib, intensity, lat, cluster_got
+    return matrix_sequence, membership_matrix, contrib, intensities, lat, cluster_got
 
 
 if __name__ == '__main__':
