@@ -63,13 +63,13 @@ def faddis(A):
         # (lt, ii) - (maximum eigen-value, corresponding position)
         eig_vals_diag = np.diag(eig_vals)
         # Only positive eigenvalues
-        di = np.argwhere(eig_vals > ZERO_BOUND).ravel()
-        dl = di.size
-        inten = np.zeros((dl, 1))
-        vm = np.zeros((matrix_dim, dl))
-        for k in range(dl):
-            lt = eig_vals_diag[di[k]]
-            vf = eig_vecs[:, di[k]]
+        eig_vals_pos = np.argwhere(eig_vals > ZERO_BOUND).ravel()
+        eig_vals_pos_len = eig_vals_pos.size
+        inten = np.zeros((eig_vals_pos_len, 1))
+        vm = np.zeros((matrix_dim, eig_vals_pos_len))
+        for k in range(eig_vals_pos_len):
+            lt = eig_vals_diag[eig_vals_pos[k]]
+            vf = eig_vecs[:, eig_vals_pos[k]]
 
             # Calculate normalized membership vector belonging to [0, 1] by
             # projection on the space. The normalization factor is the
@@ -118,7 +118,7 @@ def faddis(A):
 
         ite, ik = inten.max(), inten.argmax()
         if ite > ZERO_BOUND:
-            lat = np.append(lat, eig_vals[di[ik]])
+            lat = np.append(lat, eig_vals[eig_vals_pos[ik]])
             intensity = np.append(intensity, np.matrix([np.sqrt(ite), ite]), axis=0)
             # square root and value of lambda intensity of cluster_got
             # square root shows the value of fuzzyness
