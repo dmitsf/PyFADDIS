@@ -148,16 +148,14 @@ def faddis(A):
                 cur_intensities[k] = la1
                 vm[:, k] = uf1.ravel()
 
-        # contribs
-        inten_max, inten_max_index = cur_intensities.max(), cur_intensities.argmax()
-        print(inten_max_index)
-        if inten_max > ZERO_BOUND:
-            lat = np.append(lat, eig_vals[eig_vals_pos[inten_max_index]])
-            intensities = np.append(intensities, np.matrix([np.sqrt(inten_max),
-                                                            inten_max]), axis=0)
+        contrib_max, contrib_max_index = cur_intensities.max(), cur_intensities.argmax()
+        if contrib_max > ZERO_BOUND:
+            lat = np.append(lat, eig_vals[eig_vals_pos[contrib_max_index]])
+            intensities = np.append(intensities, np.matrix([np.sqrt(contrib_max),
+                                                            contrib_max]), axis=0)
             # square root and value of lambda intensity of cluster_got
             # square root shows the value of fuzzyness
-            uf = vm[:, inten_max_index]
+            uf = vm[:, contrib_max_index]
             vt = uf.T.dot(At).dot(uf)
             wt = uf.T.dot(uf)
 
@@ -165,7 +163,7 @@ def faddis(A):
             # calculate residual similarity matrix:
             # remove the present cluster (i.e. itensity* membership) from
             # similarity matrix
-            Att = At - inten_max * np.matrix(uf).T * np.matrix(uf)
+            Att = At - contrib_max * np.matrix(uf).T * np.matrix(uf)
             At = (Att + Att.T) / 2
             matrix_sequence.append(At)
 
