@@ -17,7 +17,7 @@ def faddis(A):
     A is NxN similatriy matrix, symmetrized
     membership_matrix - NxK membership matix of clustering;
     contrib - 1xK vector of relative contributions to the data scatter;
-    itensity - Kx2 matrix of cluster intensities^0.5 and intensities;
+    intensity - Kx2 matrix of cluster intensities^0.5 and intensities;
     lat - 1xK vector of eigen-values corresponding to clusters;
     cluster_got
     '''
@@ -116,14 +116,14 @@ def faddis(A):
                 cur_intensities[k] = la1
                 vm[:, k] = uf1.ravel()
 
-        inten_max, inten_max_index = cur_intensities.max(), cur_intensities.argmax()
-        if inten_max > ZERO_BOUND:
-            lat = np.append(lat, eig_vals[eig_vals_pos[inten_max_index]])
-            intensities = np.append(intensities, np.matrix([np.sqrt(inten_max),
-                                                            inten_max]), axis=0)
+        contrib_max, contrib_max_index = cur_intensities.max(), cur_intensities.argmax()
+        if contrib_max > ZERO_BOUND:
+            lat = np.append(lat, eig_vals[eig_vals_pos[contrib_max_index]])
+            intensities = np.append(intensities, np.matrix([np.sqrt(contrib_max),
+                                                            contrib_max]), axis=0)
             # square root and value of lambda intensity of cluster_got
             # square root shows the value of fuzzyness
-            uf = vm[:, inten_max_index]
+            uf = vm[:, contrib_max_index]
             vt = uf.T.dot(At).dot(uf)
             wt = uf.T.dot(uf)
 
@@ -131,7 +131,7 @@ def faddis(A):
             # calculate residual similarity matrix:
             # remove the present cluster (i.e. itensity* membership) from
             # similarity matrix
-            Att = At - inten_max * np.matrix(uf).T * np.matrix(uf)
+            Att = At - contrib_max * np.matrix(uf).T * np.matrix(uf)
             At = (Att + Att.T) / 2
             matrix_sequence.append(At)
 
@@ -164,7 +164,8 @@ if __name__ == '__main__':
                    [.3, .98, 1, .6],
                    [.1, .4, .6, 1 ]])
     #M = np.matrix([[1, 0, 1], [0, 3, 0], [1, 0, 9]])
-    #M = np.matrix(np.random.rand(500,500))
+    M = np.matrix(np.random.rand(500, 500))
+
     B, member, contrib, intensity, lat, tt = faddis(M)
     print("B")
     print(B)
