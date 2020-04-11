@@ -11,6 +11,13 @@ EPSILON = 5 * 10 ** (-2)
 MAX_NUM_CLUSTERS = 15
 
 
+def ensure_np_matrix(A):
+
+    if not isinstance(A, np.matrix):
+        A = np.matrix(A)
+    return A
+
+
 def faddis(A):
     ''' faddis: equential extraction of fuzzy clusters, in a sequential manner
 
@@ -21,7 +28,8 @@ def faddis(A):
     lat - 1xK vector of eigen-values corresponding to clusters;
     cluster_got
     '''
-
+    A = ensure_np_matrix(A)
+    
     # minimum cluster's relative contribution to the data scatter
     min_cont = MIN_CLUSTER_CONTRIBUTION
     # minimum relative residual data scatter
